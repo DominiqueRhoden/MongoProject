@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace DbConnectors
 {
@@ -12,7 +13,17 @@ namespace DbConnectors
         }
         public bool Ping()
         {
-            return false; // placeholder for now
+            try
+            {
+                var database = _client.GetDatabase("admin");
+                var command = new BsonDocument("ping", 1);
+                database.RunCommand<BsonDocument>(command);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
