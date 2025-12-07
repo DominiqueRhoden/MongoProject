@@ -1,29 +1,54 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
+using MongoDB.Bson;
+using System;
 
 namespace DbConnectors
 {
-    public class MongoDBConnector
+    public class MongoDBConnector : IDBConnector
     {
         private readonly MongoClient _client;
+        private readonly IMongoDatabase _database;
+        private readonly IMongoCollection<BsonDocument> _collection;
 
         public MongoDBConnector(string connectionString)
         {
             _client = new MongoClient(connectionString);
+            _database = _client.GetDatabase("testDB");
+            _collection = _database.GetCollection<BsonDocument>("testCollection");
         }
+
+        // Ping implementation
         public bool Ping()
         {
             try
             {
-                var database = _client.GetDatabase("admin");
                 var command = new BsonDocument("ping", 1);
-                database.RunCommand<BsonDocument>(command);
+                _database.RunCommand<BsonDocument>(command);
                 return true;
             }
             catch
             {
                 return false;
             }
+        }
+
+        // Insert a key/value pair
+        public void InsertData(string key, string value)
+        {
+            var doc = new BsonDocument
+            {
+                { "key", key },
+                { "value", value }
+            };
+            _collection.InsertOne(doc);
+        }
+
+        // Read value by key
+        public string ReadData(string key)
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("key", key);
+            var doc = _collection.Find(filter).FirstOrDefault();
+            return doc != null ? doc["value"].AsString : null;
         }
     }
 }
