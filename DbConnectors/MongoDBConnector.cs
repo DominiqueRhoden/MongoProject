@@ -1,6 +1,5 @@
 ﻿using MongoDB.Driver;
 using MongoDB.Bson;
-using System;
 
 namespace DbConnectors
 {
@@ -17,7 +16,6 @@ namespace DbConnectors
             _collection = _database.GetCollection<BsonDocument>("testCollection");
         }
 
-        // Ping implementation
         public bool Ping()
         {
             try
@@ -32,18 +30,12 @@ namespace DbConnectors
             }
         }
 
-        // Insert a key/value pair
         public void InsertData(string key, string value)
         {
-            var doc = new BsonDocument
-            {
-                { "key", key },
-                { "value", value }
-            };
+            var doc = new BsonDocument { { "key", key }, { "value", value } };
             _collection.InsertOne(doc);
         }
 
-        // Read value by key
         public string ReadData(string key)
         {
             var filter = Builders<BsonDocument>.Filter.Eq("key", key);

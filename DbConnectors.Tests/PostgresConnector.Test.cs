@@ -1,34 +1,54 @@
 ﻿using Xunit;
 using DbConnectors;
+using Testcontainers.PostgreSql;
+using System.Threading.Tasks;
 
 namespace DbConnectors.Tests
 {
     public class PostgresConnectorTest
     {
-        private readonly string _connectionString = "Host=localhost;Username=postgres;Password=postgres;Database=testdb";
-
         [Fact]
-        public void Ping_ShouldReturnTrue_WhenPostgresIsRunning()
+        public async Task Ping_ShouldReturnTrue_WhenPostgresIsRunning()
         {
-            var connector = new PostgresConnector(_connectionString);
+            await using var postgresContainer = new PostgreSqlBuilder()
+                .WithImage("postgres:16")
+                .WithUsername("postgres")
+                .WithPassword("postgres")
+                .WithDatabase("testdb")
+                .Build();
+
+            await postgresContainer.StartAsync();
+
+            var connector = new PostgresConnector(postgresContainer.GetConnectionString());
             var result = connector.Ping();
             Assert.True(result);
+
+            await postgresContainer.StopAsync();
         }
 
         [Fact]
-        public void InsertAndReadData_ShouldReturnCorrectValue()
+        public async Task InsertAndReadData_ShouldReturnCorrectValue()
         {
-            var connector = new PostgresConnector(_connectionString);
+            await using var postgresContainer = new PostgreSqlBuilder()
+                .WithImage("postgres:16")
+                .WithUsername("postgres")
+                .WithPassword("postgres")
+                .WithDatabase("testdb")
+                .Build();
 
-            // Insert 20 data points
+            await postgresContainer.StartAsync();
+
+            var connector = new PostgresConnector(postgresContainer.GetConnectionString());
+
             for (int i = 1; i <= 20; i++)
             {
                 connector.InsertData($"key{i}", $"value{i}");
             }
 
-            // Retrieve a specific value
             var value = connector.ReadData("key10");
             Assert.Equal("value10", value);
+
+            await postgresContainer.StopAsync();
         }
     }
 }
