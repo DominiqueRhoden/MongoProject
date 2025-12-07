@@ -10,5 +10,9 @@ namespace DbConnectors
         {
             _client = new MongoClient(connectionString);
         }
+        public bool Ping()
+        {
+            return false; // placeholder for now
+        }
     }
 }
