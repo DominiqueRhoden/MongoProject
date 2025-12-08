@@ -1,1 +1,7 @@
-<Solution />
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="DbConnectors.Tests/DbConnectors.Tests.csproj" />
+  <Project Path="DbConnectors/DbConnectors.csproj" />
+</Solution>
